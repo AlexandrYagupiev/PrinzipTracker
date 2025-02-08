@@ -1,4 +1,5 @@
 ﻿using AngleSharp;
+using AngleSharp.Dom;
 using Microsoft.EntityFrameworkCore;
 using PrinzipTrackerTest.Models;
 
@@ -35,7 +36,7 @@ namespace PrinzipTrackerTest.Services
                 }
                 await _context.SaveChangesAsync(stoppingToken);
 
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
 
@@ -49,9 +50,9 @@ namespace PrinzipTrackerTest.Services
                     var parser = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
                     var document = await parser.OpenAsync(req => req.Content(response));
 
-                    var priceElement = document.QuerySelector(".price");
+                    var priceElement = document.QuerySelector("input[type='hidden'][name='price[min]']").Attributes["value"].Value;
                     if (priceElement != null)
-                        return decimal.Parse(priceElement.TextContent.Replace(" ", "").Replace("₽", ""), System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture);
+                        return decimal.Parse(priceElement.Replace(" ", "").Replace("₽", ""));
                 }
             }
             catch
