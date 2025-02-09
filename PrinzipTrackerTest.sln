@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinzipTrackerTest", "PrinzipTrackerTest\PrinzipTrackerTest.csproj", "{4CB6DE96-0A5D-4525-A12F-93C717039F62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProjectPrinzipTracker", "TestProjectPrinzipTracker\TestProjectPrinzipTracker.csproj", "{D0BB27F9-BA4A-4BFE-A437-B2D521A982F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{4CB6DE96-0A5D-4525-A12F-93C717039F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CB6DE96-0A5D-4525-A12F-93C717039F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CB6DE96-0A5D-4525-A12F-93C717039F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0BB27F9-BA4A-4BFE-A437-B2D521A982F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0BB27F9-BA4A-4BFE-A437-B2D521A982F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0BB27F9-BA4A-4BFE-A437-B2D521A982F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0BB27F9-BA4A-4BFE-A437-B2D521A982F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

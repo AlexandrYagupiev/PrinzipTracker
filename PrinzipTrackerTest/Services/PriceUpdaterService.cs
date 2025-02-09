@@ -2,6 +2,8 @@
 using AngleSharp.Dom;
 using Microsoft.EntityFrameworkCore;
 using PrinzipTrackerTest.Models;
+using MimeKit;
+using MailKit.Net.Smtp;
 
 
 namespace PrinzipTrackerTest.Services
@@ -29,14 +31,14 @@ namespace PrinzipTrackerTest.Services
                     var currentPrice = await GetApartmentPrice(sub.ApartmentUrl);
                     if (currentPrice.HasValue && currentPrice != sub.LastPrice)
                     {
-                        SendEmailNotification(sub.Email, sub.ApartmentUrl, currentPrice.Value);
+                        await SendEmailNotification(sub.Email, sub.ApartmentUrl, currentPrice.Value);
                         sub.LastPrice = currentPrice;
                         sub.LastUpdate = DateTime.Now;
                     }
                 }
                 await _context.SaveChangesAsync(stoppingToken);
 
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
 
@@ -63,9 +65,26 @@ namespace PrinzipTrackerTest.Services
             return null;
         }
 
-        private void SendEmailNotification(string email, string apartmentUrl, decimal newPrice)
+        private async Task SendEmailNotification(string email, string apartmentUrl, decimal newPrice)
         {
             // Логика отправки email-уведомления
+            using var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress("ТестоваяРассылка", "ПочтаОтправителя"));
+            emailMessage.To.Add(new MailboxAddress("", email));
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            {
+                Text = $"Отправил уведомление на {email} об изменении цен на {apartmentUrl}. Новая цена: {newPrice}"
+            };
+
+            using (var client = new SmtpClient())
+            {
+                await client.ConnectAsync("smtp.mail.ru", 465, true);
+                await client.AuthenticateAsync("ЛогинОтПочтыОтправителя", "ПарольОтПочтыОтправителя");
+                await client.SendAsync(emailMessage);
+
+                await client.DisconnectAsync(true);
+            }
+
             _logger.LogInformation($"Отправил уведомление на {email} об изменении цен на {apartmentUrl}. Новая цена: {newPrice}");
         }
     }
