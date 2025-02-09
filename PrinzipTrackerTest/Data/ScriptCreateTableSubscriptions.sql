@@ -1,0 +1,5 @@
+CREATE TABLE Subscriptions (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ApartmentUrl TEXT NOT NULL,
+    Email TEXT NOT NULL
+);

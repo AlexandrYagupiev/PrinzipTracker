@@ -4,19 +4,22 @@ using Microsoft.EntityFrameworkCore;
 using PrinzipTrackerTest.Models;
 using MimeKit;
 using MailKit.Net.Smtp;
+using System.Net.Http;
 
 
 namespace PrinzipTrackerTest.Services
 {
-    public class PriceUpdaterService : BackgroundService
+    public class PriceUpdaterMonitoringService : BackgroundService
     {
-        private readonly ILogger<PriceUpdaterService> _logger;
-        private readonly PrinzipContext _context;
+        private readonly ILogger<PriceUpdaterMonitoringService> _logger;
+        private readonly PrinzipDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public PriceUpdaterService(ILogger<PriceUpdaterService> logger, PrinzipContext context)
+        public PriceUpdaterMonitoringService(ILogger<PriceUpdaterMonitoringService> logger, PrinzipDbContext context, HttpClient httpClient)
         {
             _logger = logger;
             _context = context;
+            _httpClient = httpClient;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,10 +31,10 @@ namespace PrinzipTrackerTest.Services
                 var subscriptions = await _context.Subscriptions.ToListAsync(stoppingToken);
                 foreach (var sub in subscriptions)
                 {
-                    var currentPrice = await GetApartmentPrice(sub.ApartmentUrl);
+                    var currentPrice = await GetApartmentPriceAsync(sub.ApartmentUrl);
                     if (currentPrice.HasValue && currentPrice != sub.LastPrice)
                     {
-                        await SendEmailNotification(sub.Email, sub.ApartmentUrl, currentPrice.Value);
+                        await SendEmailNotificationAsync(sub.Email, sub.ApartmentUrl, currentPrice.Value);
                         sub.LastPrice = currentPrice;
                         sub.LastUpdate = DateTime.Now;
                     }
@@ -42,20 +45,17 @@ namespace PrinzipTrackerTest.Services
             }
         }
 
-        private async Task<decimal?> GetApartmentPrice(string url)
+        private async Task<decimal?> GetApartmentPriceAsync(string url)
         {
             try
             {
-                using (var client = new HttpClient())
-                {
-                    var response = await client.GetStringAsync(url);
+                    var response = await _httpClient.GetStringAsync(url);
                     var parser = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
                     var document = await parser.OpenAsync(req => req.Content(response));
 
                     var priceElement = document.QuerySelector("input[type='hidden'][name='price[min]']").Attributes["value"].Value;
                     if (priceElement != null)
                         return decimal.Parse(priceElement.Replace(" ", "").Replace("₽", ""));
-                }
             }
             catch
             {
@@ -65,7 +65,7 @@ namespace PrinzipTrackerTest.Services
             return null;
         }
 
-        private async Task SendEmailNotification(string email, string apartmentUrl, decimal newPrice)
+        private async Task SendEmailNotificationAsync(string email, string apartmentUrl, decimal newPrice)
         {
             // Логика отправки email-уведомления
             using var emailMessage = new MimeMessage();

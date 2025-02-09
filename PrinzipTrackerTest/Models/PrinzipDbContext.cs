@@ -3,9 +3,9 @@
 
 namespace PrinzipTrackerTest.Models
 {
-    public class PrinzipContext : DbContext
+    public class PrinzipDbContext : DbContext
     {
-        public PrinzipContext(DbContextOptions<PrinzipContext> options)
+        public PrinzipDbContext(DbContextOptions<PrinzipDbContext> options)
             : base(options)
         {
         }

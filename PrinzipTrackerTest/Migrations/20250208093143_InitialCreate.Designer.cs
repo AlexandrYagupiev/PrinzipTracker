@@ -10,7 +10,7 @@ using PrinzipTrackerTest.Models;
 
 namespace PrinzipTrackerTest.Migrations
 {
-    [DbContext(typeof(PrinzipContext))]
+    [DbContext(typeof(PrinzipDbContext))]
     [Migration("20250208093143_InitialCreate")]
     partial class InitialCreate
     {

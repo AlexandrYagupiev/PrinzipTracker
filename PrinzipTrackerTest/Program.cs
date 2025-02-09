@@ -11,12 +11,12 @@ namespace PrinzipTrackerTest
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllers();
 
-            builder.Services.AddDbContext<PrinzipContext>(options =>
+            builder.Services.AddDbContext<PrinzipDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")),
     ServiceLifetime.Singleton);
 
-            builder.Services.AddHostedService<PriceUpdaterService>();
-
+            builder.Services.AddHostedService<PriceUpdaterMonitoringService>();
+            builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

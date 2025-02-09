@@ -10,13 +10,14 @@ namespace TestProjectPrinzipTracker
 {
     public class UnitTestSubscriptionsController
     {
-        private readonly PrinzipContext _context;
+        private readonly PrinzipDbContext _context;
         private readonly SubscriptionsController _controller;
 
         public UnitTestSubscriptionsController()
         {
-
+           
         }
+
 
         [Fact]
         public async Task Subscribe_ShouldSaveSubscription()
@@ -27,10 +28,9 @@ namespace TestProjectPrinzipTracker
                 ApartmentUrl = "test-apartment-url",
                 Email = "test@gmail.com"
             };
-            var result = await _controller.Subscribe(subscription);
+            var result = await _controller.SubscribeAsync(subscription);
 
             Assert.NotNull(result);
-            Assert.NotNull(result.Value);
             Assert.Equal(subscription.ApartmentUrl, result.Value.ApartmentUrl);
             Assert.Equal(subscription.Email, result.Value.Email);
         }

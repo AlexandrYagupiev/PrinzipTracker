@@ -9,7 +9,7 @@ using PrinzipTrackerTest.Models;
 
 namespace PrinzipTrackerTest.Migrations
 {
-    [DbContext(typeof(PrinzipContext))]
+    [DbContext(typeof(PrinzipDbContext))]
     partial class PrinzipContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

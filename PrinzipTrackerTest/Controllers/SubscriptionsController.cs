@@ -10,16 +10,18 @@ namespace PrinzipTrackerTest.Controllers
     [ApiController]
     public class SubscriptionsController : ControllerBase
     {
-        private readonly PrinzipContext _context;
+        private readonly PrinzipDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public SubscriptionsController(PrinzipContext context)
+        public SubscriptionsController(PrinzipDbContext context, HttpClient httpClient)
         {
             _context = context;
+            _httpClient = httpClient;
         }
 
         // POST api/subscriptions
         [HttpPost]
-        public async Task<ActionResult<Subscription>> Subscribe(Subscription subscription)
+        public async Task<ActionResult<Subscription>> SubscribeAsync(Subscription subscription)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -31,12 +33,12 @@ namespace PrinzipTrackerTest.Controllers
             _context.Subscriptions.Add(subscription);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetSubscription), new { id = subscription.Id }, subscription);
+            return CreatedAtAction(nameof(GetSubscriptionAsync), new { id = subscription.Id }, subscription);
         }
 
         // GET api/subscriptions/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Subscription>> GetSubscription(int id)
+        public async Task<ActionResult<Subscription>> GetSubscriptionAsync(int id)
         {
             var subscription = await _context.Subscriptions.FindAsync(id);
             if (subscription == null)
@@ -47,12 +49,12 @@ namespace PrinzipTrackerTest.Controllers
 
         // GET api/subscriptions/currentprices
         [HttpGet("currentprices")]
-        public async Task<IActionResult> GetCurrentPrices()
+        public async Task<IActionResult> GetCurrentPricesAsync()
         {
             var subscriptions = await _context.Subscriptions.ToListAsync();
             foreach (var sub in subscriptions)
             {
-                var price = await GetApartmentPrice(sub.ApartmentUrl);
+                var price = await GetApartmentPriceAsync(sub.ApartmentUrl);
                 if (price.HasValue)
                     sub.LastPrice = price.Value;
                 sub.LastUpdate = DateTime.Now;
@@ -62,20 +64,17 @@ namespace PrinzipTrackerTest.Controllers
             return Ok(subscriptions.Select(s => new { s.ApartmentUrl, s.LastPrice }));
         }
 
-        private async Task<decimal?> GetApartmentPrice(string url)
+        private async Task<decimal?> GetApartmentPriceAsync(string url)
         {
             try
             {
-                using (var client = new HttpClient())
-                {
-                    var response = await client.GetStringAsync(url);
+                    var response = await _httpClient.GetStringAsync(url);
                     var parser = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
                     var document = await parser.OpenAsync(req => req.Content(response));
 
                     var priceElement = document.QuerySelector(".price");
                     if (priceElement != null)
-                        return decimal.Parse(priceElement.TextContent.Replace(" ", "").Replace("₽", ""), System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture);
-                }
+                        return decimal.Parse(priceElement.TextContent.Replace(" ", "").Replace("₽", ""));
             }
             catch
             {
